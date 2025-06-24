@@ -17,6 +17,7 @@ import { LightningLayer } from './components/LightningLayer';
 import { SnowCanvas } from './components/SnowCanvas';
 import { StarsCanvas } from './components/StarsCanvas';
 import { CozyWidget } from './components/CozyWidget';
+import WeatherAudio from './components/WeatherAudio';
 
 function App() {
 	const params = new URLSearchParams(window.location.search);
@@ -117,6 +118,7 @@ function App() {
 						<p className="mt-2">Rain Intensity: {weather ? getRainIntensity(weather.weathercode) : 'Loading...'}</p>
 					</div>
 					<WeatherWidget weather={weather ?? null} Icon={Icon ?? undefined} />
+					<WeatherAudio type="inside" />
 				</div>
 			)}
 		</>

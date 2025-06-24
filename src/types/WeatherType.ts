@@ -85,7 +85,7 @@ export function isFog(code: number) {
 type Intensity = 'none' | 'light' | 'moderate' | 'heavy';
 
 export function getRainIntensity(code: number): Intensity {
-	if ([51, 53, 56, 61, 80].includes(code)) return 'light';
+	if ([51, 53, 56, 61, 80, 66].includes(code)) return 'light';
 	if ([55, 63, 81].includes(code)) return 'moderate';
 	if ([65, 67, 82, 95, 96, 99].includes(code)) return 'heavy';
 	return 'none';
