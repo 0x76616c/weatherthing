@@ -4,6 +4,7 @@ type Flash = {
 	id: number;
 	opacity: number;
 	duration: number;
+	color: string;
 };
 
 export function LightningLayer() {
@@ -26,29 +27,31 @@ export function LightningLayer() {
 		};
 
 		const runFlashSequence = () => {
-			const sequence = [
-				{ opacity: 0.2, duration: 120 },
-				...(Math.random() > 0.5
-					? [
-							{ opacity: 0.4, duration: 80 },
-							{ opacity: 0.3, duration: 60 },
-						]
-					: []),
-			];
-
+			const flickers = Math.floor(Math.random() * 2) + 2; // 2–3 flickers
 			let totalDelay = 0;
 
-			sequence.forEach(({ opacity, duration }) => {
+			for (let i = 0; i < flickers; i++) {
+				const opacity = 0.7 + Math.random() * 0.3; // 0.7–1.0
+				const duration = 40 + Math.random() * 60; // 40–100ms
+				const color = `rgba(${220 + Math.random() * 35},${220 + Math.random() * 35},255,1)`; // somethingish-white
+
 				setTimeout(() => {
 					const flashId = id++;
-					setFlash({ id: flashId, opacity, duration });
+					setFlash({ id: flashId, opacity, duration, color });
 					setTimeout(() => {
 						setFlash(null);
 					}, duration);
 				}, totalDelay);
 
-				totalDelay += duration + 80; // padding between flickers
-			});
+				totalDelay += duration + 40 + Math.random() * 40; // random gap
+			}
+
+			// afterglow
+			setTimeout(() => {
+				const flashId = id++;
+				setFlash({ id: flashId, opacity: 0.15, duration: 300, color: 'rgba(200,220,255,1)' });
+				setTimeout(() => setFlash(null), 300);
+			}, totalDelay);
 		};
 
 		scheduleNext();
@@ -60,10 +63,11 @@ export function LightningLayer() {
 	return (
 		<div
 			key={flash.id}
-			className="fixed inset-0 bg-white pointer-events-none transition-opacity -z-40"
+			className="fixed inset-0 pointer-events-none transition-opacity -z-40"
 			style={{
+				background: flash.color,
 				opacity: flash.opacity,
-				transitionDuration: `${flash.duration}ms`,
+				transition: `opacity ${flash.duration}ms linear`,
 			}}
 		/>
 	);
