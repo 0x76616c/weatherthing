@@ -27,7 +27,7 @@ export function LightningLayer() {
 
 		const runFlashSequence = () => {
 			const sequence = [
-				{ opacity: 0.8, duration: 120 },
+				{ opacity: 0.2, duration: 120 },
 				...(Math.random() > 0.5
 					? [
 							{ opacity: 0.4, duration: 80 },
