@@ -5,7 +5,7 @@ type Props = {
 	config: any;
 };
 
-export default function HaThing({ hass, config }: Props) {
+export default function HaThing({ hass }: Props) {
 	const lon = hass.states!['zone.home']!.attributes!.longitude;
 	const lat = hass.states!['zone.home']!.attributes!.latitude;
 

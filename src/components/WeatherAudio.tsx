@@ -1,4 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+/* eslint-disable no-empty */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useEffect, useRef, useState } from 'react';
 
 interface WeatherAudioProps {
 	type: 'inside' | 'outside';
@@ -60,6 +62,7 @@ export default function WeatherAudio(props: WeatherAudioProps) {
 			return;
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
 		audioContextRef.current = ctx;
 
@@ -109,10 +112,10 @@ export default function WeatherAudio(props: WeatherAudioProps) {
 
 		// Oscillating gain logic
 		let currentTarget = 1.0;
+		// @ts-expect-error idk whys this here
 		let lastValue = 1.0;
 		const min = 0.85;
 		const max = 1.1;
-		const interval = 100; // ms
 		const stepDuration = 2000 + Math.random() * 2000; // 2-4 seconds per oscillation
 
 		function setNextTarget() {

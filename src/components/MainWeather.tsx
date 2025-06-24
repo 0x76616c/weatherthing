@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BackgroundCanvas } from './BackgroundCanvas';
 import { LightningLayer } from './LightningLayer';
 import { SnowCanvas } from './SnowCanvas';
 import { StarsCanvas } from './StarsCanvas';
 import { CozyWidget } from './CozyWidget';
+import { useWeather } from '../hooks/weather';
 
 type Props = {
 	lat: number;
@@ -12,18 +12,15 @@ type Props = {
 };
 
 export default function MainWeather(props: Props) {
-	const {
+	const { // TODO: use loading property
 		weather,
 		timeTheme,
-		loading,
 		bgTheme,
-		Icon,
 		rainIntensity,
 		showLightning,
 		showFog,
 		snowIntensity,
 		windSpeed,
-		windDeg,
 		windVector,
 	} = useWeather({
 		lat: props.lat,

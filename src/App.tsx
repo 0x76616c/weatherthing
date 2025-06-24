@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getRainIntensity, weatherCodeMap } from './types/WeatherType';
 import { WeatherWidget } from './components/WeatherWidget';
 import { BackgroundCanvas } from './components/BackgroundCanvas';
@@ -21,10 +20,10 @@ function App() {
 		lon: userLon ?? '37',
 	};
 
+	// TODO: use loading property
 	const {
 		weather,
 		timeTheme,
-		loading, // TODO: use this
 		bgTheme,
 		Icon,
 		rainIntensity,

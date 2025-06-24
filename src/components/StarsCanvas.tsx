@@ -47,7 +47,6 @@ export function StarsCanvas() {
 
 		initStars();
 
-		const fading = true;
 		const fadeTimer = setInterval(() => {
 			setVisibleStars((prev) => {
 				if (prev > 14) return prev - 2;
