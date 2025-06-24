@@ -1,15 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from 'react';
-import { getTimeTheme, gradientThemes, type TimeTheme } from '../types/TimeType';
-import {
-	getRainIntensity,
-	getSnowIntensity,
-	isFog,
-	isThunder,
-	weatherCodeMap,
-	weatherIconMap,
-	type CurrentWeather,
-} from '../types/WeatherType';
 import { BackgroundCanvas } from './BackgroundCanvas';
 import { LightningLayer } from './LightningLayer';
 import { SnowCanvas } from './SnowCanvas';
@@ -23,50 +12,24 @@ type Props = {
 };
 
 export default function MainWeather(props: Props) {
-	const [weather, setWeather] = useState<CurrentWeather>();
-	const [timeTheme, setTimeTheme] = useState<TimeTheme>('night');
-	const [loading, setLoading] = useState(true);
-
-	useEffect(() => {
-		fetch(`https://api.open-meteo.com/v1/forecast?latitude=${props.lat}&longitude=${props.lon}&current_weather=true`)
-			.then((res) => res.json())
-			.then((data) => {
-				console.log('Weather data:', data);
-				setWeather(data.current_weather);
-
-				if (typeof props.customCode === 'number') {
-					data.current_weather.weathercode = props.customCode;
-				}
-
-				const localHour = new Date().getHours();
-				setTimeTheme(getTimeTheme(localHour));
-				setLoading(false);
-			})
-			.catch((error) => {
-				console.error('Weather fetch error:', error);
-				setLoading(false);
-			});
-	}, [props.lat, props.lon, props.customCode]);
-
-	const bgTheme = loading ? gradientThemes.night : gradientThemes[timeTheme];
-
-	const rainIntensity = weather ? getRainIntensity(weather.weathercode) : 'none';
-
-	const showLightning = weather ? isThunder(weather.weathercode) : false;
-
-	const showFog = weather ? isFog(weather.weathercode) : false;
-
-	const snowIntensity = weather ? getSnowIntensity(weather.weathercode) : 'none';
-
-	const windSpeed = weather ? weather.windspeed : 0;
-
-	const windDeg = weather ? weather.winddirection : 0;
-
-	// shoutout chatgpt 4o 🔥
-	const windVector = {
-		x: Math.cos((windDeg * Math.PI) / 180),
-		y: Math.sin((windDeg * Math.PI) / 180),
-	};
+	const {
+		weather,
+		timeTheme,
+		loading,
+		bgTheme,
+		Icon,
+		rainIntensity,
+		showLightning,
+		showFog,
+		snowIntensity,
+		windSpeed,
+		windDeg,
+		windVector,
+	} = useWeather({
+		lat: props.lat,
+		lon: props.lon,
+		customCode: props.customCode,
+	});
 
 	return (
 		<>

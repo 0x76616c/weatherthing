@@ -1,16 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from 'react';
-import './App.css';
-import { getTimeTheme, gradientThemes, type TimeTheme } from './types/TimeType';
-import {
-	getRainIntensity,
-	getSnowIntensity,
-	isFog,
-	isThunder,
-	weatherCodeMap,
-	weatherIconMap,
-	type CurrentWeather,
-} from './types/WeatherType';
+import { getRainIntensity, weatherCodeMap } from './types/WeatherType';
 import { WeatherWidget } from './components/WeatherWidget';
 import { BackgroundCanvas } from './components/BackgroundCanvas';
 import { LightningLayer } from './components/LightningLayer';
@@ -18,6 +7,7 @@ import { SnowCanvas } from './components/SnowCanvas';
 import { StarsCanvas } from './components/StarsCanvas';
 import { CozyWidget } from './components/CozyWidget';
 import WeatherAudio from './components/WeatherAudio';
+import { useWeather } from './hooks/weather';
 
 function App() {
 	const params = new URLSearchParams(window.location.search);
@@ -30,54 +20,24 @@ function App() {
 		lat: userLat ?? '21',
 		lon: userLon ?? '37',
 	};
-	console.log('Location:', location);
-	const [weather, setWeather] = useState<CurrentWeather>();
-	const [timeTheme, setTimeTheme] = useState<TimeTheme>('night');
-	const [loading, setLoading] = useState(true);
 
-	useEffect(() => {
-		fetch(
-			`https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current_weather=true`,
-		)
-			.then((res) => res.json())
-			.then((data) => {
-				setWeather(data.current_weather);
-
-				if (typeof customWeatherCode === 'number') {
-					data.current_weather.weathercode = customWeatherCode;
-				}
-
-				const localHour = new Date().getHours();
-				setTimeTheme(getTimeTheme(localHour));
-				setLoading(false);
-			})
-			.catch((error) => {
-				console.error('Weather fetch error:', error);
-				setLoading(false);
-			});
-	}, [customWeatherCode, location.lat, location.lon]);
-
-	const bgTheme = loading ? gradientThemes.night : gradientThemes[timeTheme];
-
-	const Icon = weather ? weatherIconMap[weatherCodeMap[weather.weathercode]] : null;
-
-	const rainIntensity = weather ? getRainIntensity(weather.weathercode) : 'none';
-
-	const showLightning = weather ? isThunder(weather.weathercode) : false;
-
-	const showFog = weather ? isFog(weather.weathercode) : false;
-
-	const snowIntensity = weather ? getSnowIntensity(weather.weathercode) : 'none';
-
-	const windSpeed = weather ? weather.windspeed : 0;
-
-	const windDeg = weather ? weather.winddirection : 0;
-
-	// shoutout chatgpt 4o 🔥
-	const windVector = {
-		x: Math.cos((windDeg * Math.PI) / 180),
-		y: Math.sin((windDeg * Math.PI) / 180),
-	};
+	const {
+		weather,
+		timeTheme,
+		loading, // TODO: use this
+		bgTheme,
+		Icon,
+		rainIntensity,
+		showLightning,
+		showFog,
+		snowIntensity,
+		windSpeed,
+		windVector,
+	} = useWeather({
+		lat: location.lat, // or props.lat
+		lon: location.lon, // or props.lon
+		customCode: customWeatherCode, // or props.customCode
+	});
 
 	return (
 		<>
