@@ -11,10 +11,27 @@ export const WeatherType = {
 
 export type WeatherType = (typeof WeatherType)[keyof typeof WeatherType];
 
+export type Intensity = 'none' | 'light' | 'moderate' | 'heavy';
+
+export type CurrentWeather = {
+	time: string;
+	interval: number;
+	temperature: number;
+	windspeed: number;
+	winddirection: number;
+	is_day: number;
+	weathercode: number;
+};
+
+export type WeatherIcon = React.ComponentType<{ className?: string }>;
+
+// Weather code mappings with better organization
 export const weatherCodeMap: Record<number, WeatherType> = {
-	// clear & cloudy
+	// clear sky
 	0: WeatherType.Clear,
 	1: WeatherType.Clear,
+
+	// cloudy
 	2: WeatherType.Cloudy,
 	3: WeatherType.Cloudy,
 
@@ -22,7 +39,7 @@ export const weatherCodeMap: Record<number, WeatherType> = {
 	45: WeatherType.Fog,
 	48: WeatherType.Fog,
 
-	// rain (includes drizzle + freezing rain + rain showers)
+	// rain (drizzle, freezing rain, rain showers)
 	51: WeatherType.Rain,
 	53: WeatherType.Rain,
 	55: WeatherType.Rain,
@@ -37,7 +54,7 @@ export const weatherCodeMap: Record<number, WeatherType> = {
 	81: WeatherType.Rain,
 	82: WeatherType.Rain,
 
-	// snow (includes snow grains & snow showers)
+	// snow (snow grains, snow showers)
 	71: WeatherType.Snow,
 	73: WeatherType.Snow,
 	75: WeatherType.Snow,
@@ -49,51 +66,52 @@ export const weatherCodeMap: Record<number, WeatherType> = {
 	95: WeatherType.Thunder,
 	96: WeatherType.Thunder,
 	99: WeatherType.Thunder,
-};
+} as const;
 
-export const weatherIconMap: Record<WeatherType, React.ComponentType<{ className?: string }>> = {
+export const weatherIconMap: Record<WeatherType, WeatherIcon> = {
 	[WeatherType.Clear]: Sun,
 	[WeatherType.Cloudy]: Cloud,
 	[WeatherType.Fog]: CloudFog,
 	[WeatherType.Rain]: CloudRain,
 	[WeatherType.Snow]: Snowflake,
 	[WeatherType.Thunder]: CloudLightning,
-};
+} as const;
 
-export type CurrentWeather = {
-	time: string;
-	interval: number;
-	temperature: number;
-	windspeed: number;
-	winddirection: number;
-	is_day: number;
-	weathercode: number;
-};
-
-export function isThunder(code: number) {
+// Weather condition checkers
+export const isThunder = (code: number): boolean => {
 	return [95, 96, 99].includes(code);
-}
+};
 
-export function isCloudy(code: number) {
-	return [2, 3].includes(code); // overcast or cloudy
-}
+export const isCloudy = (code: number): boolean => {
+	return [2, 3].includes(code);
+};
 
-export function isFog(code: number) {
-	return [45, 48].includes(code); // fog
-}
+export const isFog = (code: number): boolean => {
+	return [45, 48].includes(code);
+};
 
-type Intensity = 'none' | 'light' | 'moderate' | 'heavy';
-
-export function getRainIntensity(code: number): Intensity {
+// Intensity getters with proper type safety
+export const getRainIntensity = (code: number): Intensity => {
 	if ([51, 53, 56, 61, 80, 66].includes(code)) return 'light';
 	if ([55, 63, 81].includes(code)) return 'moderate';
 	if ([65, 67, 82, 95, 96, 99].includes(code)) return 'heavy';
 	return 'none';
-}
+};
 
-export function getSnowIntensity(code: number): Intensity {
+export const getSnowIntensity = (code: number): Intensity => {
 	if ([71, 73, 77].includes(code)) return 'light';
 	if ([75, 85].includes(code)) return 'moderate';
 	if ([86].includes(code)) return 'heavy';
 	return 'none';
-}
+};
+
+// Helper function to get weather type from code
+export const getWeatherType = (code: number): WeatherType => {
+	return weatherCodeMap[code] ?? WeatherType.Clear;
+};
+
+// Helper function to get weather icon from code
+export const getWeatherIcon = (code: number): WeatherIcon => {
+	const weatherType = getWeatherType(code);
+	return weatherIconMap[weatherType];
+};
