@@ -43,9 +43,11 @@ export function BackgroundCanvas({
 
 		const windPush = wind.x * windSpeed * 0.07;
 
+    const offsetX = 800;
+
 		// generate drops
 		const drops = Array.from({ length: dropCount }, () => ({
-			x: Math.random() * width,
+			x: (Math.random() * (width + offsetX)) - (offsetX / 2),
 			y: Math.random() * height,
 			length: Math.random() * 20 + 10,
 			speed: Math.random() * dropSpeed + 1,
@@ -68,7 +70,7 @@ export function BackgroundCanvas({
 
 				if (drop.y > height) {
 					drop.y = -drop.length;
-					drop.x = Math.random() * width;
+					drop.x = (Math.random() * (width + offsetX)) - (offsetX / 2);
 				}
 			}
 
