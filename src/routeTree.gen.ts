@@ -10,32 +10,42 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as HaRouteImport } from './routes/ha'
+import { Route as IndexRouteImport } from './routes/index'
 
 const HaRoute = HaRouteImport.update({
   id: '/ha',
   path: '/ha',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/ha': typeof HaRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/ha': typeof HaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/ha': typeof HaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/ha'
+  fullPaths: '/' | '/ha'
   fileRoutesByTo: FileRoutesByTo
-  to: '/ha'
-  id: '__root__' | '/ha'
+  to: '/' | '/ha'
+  id: '__root__' | '/' | '/ha'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   HaRoute: typeof HaRoute
 }
 
@@ -48,10 +58,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   HaRoute: HaRoute,
 }
 export const routeTree = rootRouteImport

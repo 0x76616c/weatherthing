@@ -1,27 +1,30 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    tanstackRouter({
-      target: "react",
-      autoCodeSplitting: true,
-    }),
-    react(),
-    tailwindcss(),
-  ],
-  build: {
-    minify: "terser",
-    terserOptions: {
-      compress: true,
-      mangle: true,
-      format: {
-        beautify: false,
-        comments: false,
-      },
-    },
-  },
+	plugins: [
+		tanstackRouter({
+			target: 'react',
+			autoCodeSplitting: true,
+		}),
+		react(),
+		tailwindcss(),
+	],
+	build: {
+		minify: 'terser',
+		terserOptions: {
+			compress: true,
+			mangle: true,
+			format: {
+				beautify: false,
+				comments: false,
+			},
+		},
+	},
+	server: {
+		allowedHosts: true,
+	},
 });

@@ -1,8 +1,0 @@
-{
-  "domain": "weather_card",
-  "name": "Fancy Weather Card",
-  "version": "1.0.0",
-  "dependencies": [],
-  "data": ["react.js"],
-  "codeowners": []
-}

@@ -1,100 +1,87 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
-import "./App.css";
-import { getTimeTheme, gradientThemes, type TimeTheme } from "./types/TimeType";
+import { useEffect, useState } from 'react';
+import './App.css';
+import { getTimeTheme, gradientThemes, type TimeTheme } from './types/TimeType';
 import {
-  getRainIntensity,
-  getSnowIntensity,
-  isFog,
-  isThunder,
-  weatherCodeMap,
-  weatherIconMap,
-  type CurrentWeather,
-} from "./types/WeatherType";
-import { WeatherWidget } from "./components/WeatherWidget";
-import { BackgroundCanvas } from "./components/BackgroundCanvas";
-import { LightningLayer } from "./components/LightningLayer";
-import { SnowCanvas } from "./components/SnowCanvas";
-import { StarsCanvas } from "./components/StarsCanvas";
-import { CozyWidget } from "./components/CozyWidget";
+	getRainIntensity,
+	getSnowIntensity,
+	isFog,
+	isThunder,
+	weatherCodeMap,
+	weatherIconMap,
+	type CurrentWeather,
+} from './types/WeatherType';
+import { WeatherWidget } from './components/WeatherWidget';
+import { BackgroundCanvas } from './components/BackgroundCanvas';
+import { LightningLayer } from './components/LightningLayer';
+import { SnowCanvas } from './components/SnowCanvas';
+import { StarsCanvas } from './components/StarsCanvas';
+import { CozyWidget } from './components/CozyWidget';
 
-type Props = {
-  hass?: any;
-  config?: any;
-};
+function App() {
+	const params = new URLSearchParams(window.location.search);
+	const cozyMode = params.get('cozy');
+	const userLat = params.get('lat');
+	const userLon = params.get('lon');
+	const customWeatherCode = params.get('customCode') ? parseInt(params.get('customCode') ?? '0', 10) : undefined;
 
-function App({ hass, config }: Props = {}) {
-  const params = new URLSearchParams(window.location.search);
-  const cozyMode = params.get("cozy") !== null && !!hass;
-  const userLat = params.get("lat") || hass?.states?.["zone.home"]?.attributes?.latitude;
-  const userLon = params.get("lon") || hass?.states?.["zone.home"]?.attributes?.longitude;
-  const customWeatherCode = params.get("customCode")
-    ? parseInt(params.get("customCode") ?? "0", 10)
-    : undefined;
+	const location = {
+		lat: userLat ?? '21',
+		lon: userLon ?? '37',
+	};
+	console.log('Location:', location);
+	const [weather, setWeather] = useState<CurrentWeather>();
+	const [timeTheme, setTimeTheme] = useState<TimeTheme>('night');
+	const [loading, setLoading] = useState(true);
 
-  const location = {
-    lat: userLat ?? "21",
-    lon: userLon ?? "37",
-  };
-  console.log("Location:", location);
-  const [weather, setWeather] = useState<CurrentWeather>();
-  const [timeTheme, setTimeTheme] = useState<TimeTheme>("night");
-  const [loading, setLoading] = useState(true);
+	useEffect(() => {
+		fetch(
+			`https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current_weather=true`,
+		)
+			.then((res) => res.json())
+			.then((data) => {
+				setWeather(data.current_weather);
 
-  useEffect(() => {
-    fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current_weather=true`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        setWeather(data.current_weather);
+				if (typeof customWeatherCode === 'number') {
+					data.current_weather.weathercode = customWeatherCode;
+				}
 
-        if (typeof customWeatherCode === "number") {
-          data.current_weather.weathercode = customWeatherCode;
-        }
+				const localHour = new Date().getHours();
+				setTimeTheme(getTimeTheme(localHour));
+				setLoading(false);
+			})
+			.catch((error) => {
+				console.error('Weather fetch error:', error);
+				setLoading(false);
+			});
+	}, [customWeatherCode, location.lat, location.lon]);
 
-        const localHour = new Date().getHours();
-        setTimeTheme(getTimeTheme(localHour));
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Weather fetch error:", error);
-        setLoading(false);
-      });
-  }, [location.lat, location.lon]);
+	const bgTheme = loading ? gradientThemes.night : gradientThemes[timeTheme];
 
-  const bgTheme = loading ? gradientThemes.night : gradientThemes[timeTheme];
+	const Icon = weather ? weatherIconMap[weatherCodeMap[weather.weathercode]] : null;
 
-  const Icon = weather
-    ? weatherIconMap[weatherCodeMap[weather.weathercode]]
-    : null;
+	const rainIntensity = weather ? getRainIntensity(weather.weathercode) : 'none';
 
-  const rainIntensity = weather
-    ? getRainIntensity(weather.weathercode)
-    : "none";
+	const showLightning = weather ? isThunder(weather.weathercode) : false;
 
-  const showLightning = weather ? isThunder(weather.weathercode) : false;
+	const showFog = weather ? isFog(weather.weathercode) : false;
 
-  const showFog = weather ? isFog(weather.weathercode) : false;
+	const snowIntensity = weather ? getSnowIntensity(weather.weathercode) : 'none';
 
-  const snowIntensity = weather
-    ? getSnowIntensity(weather.weathercode)
-    : "none";
+	const windSpeed = weather ? weather.windspeed : 0;
 
-  const windSpeed = weather ? weather.windspeed : 0;
+	const windDeg = weather ? weather.winddirection : 0;
 
-  const windDeg = weather ? weather.winddirection : 0;
+	// shoutout chatgpt 4o 🔥
+	const windVector = {
+		x: Math.cos((windDeg * Math.PI) / 180),
+		y: Math.sin((windDeg * Math.PI) / 180),
+	};
 
-  // shoutout chatgpt 4o 🔥
-  const windVector = {
-    x: Math.cos((windDeg * Math.PI) / 180),
-    y: Math.sin((windDeg * Math.PI) / 180),
-  };
-
-  return (
-    <>
-      <div
-        className={`
+	return (
+		<>
+			<div
+				className={`
           fixed inset-0 -z-50
           bg-gradient-to-br
           ${bgTheme}
@@ -102,59 +89,38 @@ function App({ hass, config }: Props = {}) {
           animate-gradient-xy
           pointer-events-none
         `}
-      />
+			/>
 
-      {rainIntensity === "heavy" && (
-        <div className="fixed inset-0 -z-40 bg-black/40 transition-opacity duration-500 pointer-events-none" />
-      )}
+			{rainIntensity === 'heavy' && (
+				<div className="fixed inset-0 -z-40 bg-black/40 transition-opacity duration-500 pointer-events-none" />
+			)}
 
-      {snowIntensity !== "none" && (
-        <SnowCanvas
-          snowIntensity={snowIntensity}
-          wind={windVector}
-          windSpeed={windSpeed}
-        />
-      )}
+			{snowIntensity !== 'none' && <SnowCanvas snowIntensity={snowIntensity} wind={windVector} windSpeed={windSpeed} />}
 
-      {showFog && (
-        <div className="fixed inset-0 -z-45 backdrop-blur-[2px] bg-white/5 transition-opacity duration-700 pointer-events-none" />
-      )}
+			{showFog && (
+				<div className="fixed inset-0 -z-45 backdrop-blur-[2px] bg-white/5 transition-opacity duration-700 pointer-events-none" />
+			)}
 
-      {showLightning && <LightningLayer />}
+			{showLightning && <LightningLayer />}
 
-      {timeTheme === "night" &&
-        !showFog &&
-        !showLightning &&
-        snowIntensity === "none" && <StarsCanvas />}
+			{timeTheme === 'night' && !showFog && !showLightning && snowIntensity === 'none' && <StarsCanvas />}
 
-      <BackgroundCanvas
-        rainIntensity={rainIntensity}
-        wind={windVector}
-        windSpeed={windSpeed}
-      />
+			<BackgroundCanvas rainIntensity={rainIntensity} wind={windVector} windSpeed={windSpeed} />
 
-      {cozyMode ? (
-        <CozyWidget weather={weather ?? undefined} />
-      ) : (
-        <div className="relative w-screen h-screen flex items-center justify-center text-white">
-          <div className="p-4 max-w-md">
-            <pre className="text-xs bg-black/30 rounded p-2">
-              {JSON.stringify(weather, null, 2)}
-            </pre>
-            <p className="mt-2">
-              Weather type:{" "}
-              {weather ? weatherCodeMap[weather.weathercode] : "Loading..."}
-            </p>
-            <p className="mt-2">
-              Rain Intensity:{" "}
-              {weather ? getRainIntensity(weather.weathercode) : "Loading..."}
-            </p>
-          </div>
-          <WeatherWidget weather={weather ?? null} Icon={Icon ?? undefined} />
-        </div>
-      )}
-    </>
-  );
+			{cozyMode ? (
+				<CozyWidget weather={weather ?? undefined} />
+			) : (
+				<div className="relative w-screen h-screen flex items-center justify-center text-white">
+					<div className="p-4 max-w-md">
+						<pre className="text-xs bg-black/30 rounded p-2">{JSON.stringify(weather, null, 2)}</pre>
+						<p className="mt-2">Weather type: {weather ? weatherCodeMap[weather.weathercode] : 'Loading...'}</p>
+						<p className="mt-2">Rain Intensity: {weather ? getRainIntensity(weather.weathercode) : 'Loading...'}</p>
+					</div>
+					<WeatherWidget weather={weather ?? null} Icon={Icon ?? undefined} />
+				</div>
+			)}
+		</>
+	);
 }
 
 export default App;
